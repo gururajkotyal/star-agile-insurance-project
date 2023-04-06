@@ -8,7 +8,7 @@ node{
     
     stage('prepare enviroment'){
         echo 'initialize all the variables'
-        mavenHome = tool name: 'maven' , type: 'maven'
+        mavenHome = tool name: 'MVN_HOME' , type: 'maven'
         mavenCMD = "${mavenHome}/bin/mvn"
         docker = tool name: 'docker' , type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool'
         dockerCMD = "${docker}/bin/docker"
@@ -46,14 +46,14 @@ node{
     
     stage('Pushing it ot the DockerHub'){
         echo 'Pushing the docker image to DockerHub'
-        withCredentials([string(credentialsId: 'dock-password', variable: 'dockerHubPassword')]) {
-        sh "${dockerCMD} login -u gururajdockerusername -p ${dockerHubPassword}"
+        withCredentials([string(credentialsId: 'dockerpasswd', variable: 'dockerpasswd')]) {
+        sh "${dockerCMD} login -u gururajdockerusername -p ${dockerpasswd}"
         sh "${dockerCMD} push gururajdockerusername/insure-me:${tagName}"
             
         }
         
     stage('Configure and Deploy to the test-server'){
-        ansiblePlaybook become: true, credentialsId: 'ansible-key', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml'
+        sh 'ansible-playbook ansible-playbook.yml'
     }
         
         
